@@ -9,23 +9,33 @@
   // ===========================
   // Intersection Observer for Scroll Fade Reveals
   // ===========================
-  const observerOptions = {
-    root: null,
-    rootMargin: '0px',
-    threshold: 0.1
-  };
-
-  const fadeObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('fade-in');
-        fadeObserver.unobserve(entry.target); // Only animate once
-      }
-    });
-  }, observerOptions);
-
-  // Observe all cards and sections on page load
   function initScrollReveal() {
+    // Check if IntersectionObserver is supported
+    if (!('IntersectionObserver' in window)) {
+      // Fallback: just add the fade-in class immediately for older browsers
+      const elementsToReveal = document.querySelectorAll('.card, .project-card, .update-post, section');
+      elementsToReveal.forEach(el => {
+        el.classList.add('fade-in');
+      });
+      return;
+    }
+
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.1
+    };
+
+    const fadeObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('fade-in');
+          fadeObserver.unobserve(entry.target); // Only animate once
+        }
+      });
+    }, observerOptions);
+
+    // Observe all cards and sections on page load
     const elementsToReveal = document.querySelectorAll('.card, .project-card, .update-post, section');
     elementsToReveal.forEach(el => {
       fadeObserver.observe(el);
@@ -79,30 +89,60 @@
       form.addEventListener('submit', function(e) {
         const requiredFields = form.querySelectorAll('[required]');
         let isValid = true;
+        let firstInvalidField = null;
+        
+        // Clear previous error messages
+        const existingErrors = form.querySelectorAll('.error-message');
+        existingErrors.forEach(err => err.remove());
         
         requiredFields.forEach(field => {
           if (!field.value.trim()) {
             isValid = false;
             field.style.borderColor = '#ff4444';
             field.setAttribute('aria-invalid', 'true');
+            
+            // Create inline error message
+            const errorMsg = document.createElement('span');
+            errorMsg.className = 'error-message';
+            errorMsg.style.color = '#ff4444';
+            errorMsg.style.fontSize = '0.875rem';
+            errorMsg.style.marginTop = '0.25rem';
+            errorMsg.style.display = 'block';
+            errorMsg.setAttribute('role', 'alert');
+            errorMsg.textContent = 'This field is required';
+            
+            field.parentNode.insertBefore(errorMsg, field.nextSibling);
+            
+            if (!firstInvalidField) {
+              firstInvalidField = field;
+            }
           } else {
-            field.style.borderColor = 'var(--primary)';
+            field.style.borderColor = 'rgba(88, 213, 255, 0.2)';
             field.removeAttribute('aria-invalid');
           }
         });
         
         if (!isValid) {
           e.preventDefault();
-          alert('Please fill in all required fields.');
+          // Focus first invalid field for accessibility
+          if (firstInvalidField) {
+            firstInvalidField.focus();
+          }
         }
       });
       
-      // Reset border color on input
+      // Reset border color and remove error on input
       const inputs = form.querySelectorAll('input, textarea');
       inputs.forEach(input => {
         input.addEventListener('input', function() {
           this.style.borderColor = 'rgba(88, 213, 255, 0.2)';
           this.removeAttribute('aria-invalid');
+          
+          // Remove error message if it exists
+          const errorMsg = this.nextElementSibling;
+          if (errorMsg && errorMsg.classList.contains('error-message')) {
+            errorMsg.remove();
+          }
         });
       });
     });
