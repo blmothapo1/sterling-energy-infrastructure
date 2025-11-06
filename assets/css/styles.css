@@ -587,6 +587,32 @@ footer a:hover {
 }
 
 /* ===========================
+   Callout Boxes
+   =========================== */
+.callout {
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  margin: 2rem 0;
+  border-left: 4px solid var(--primary);
+  background: var(--card);
+  box-shadow: var(--shadow-card);
+}
+
+.callout.note {
+  border-left-color: var(--accent);
+  background: rgba(142, 245, 163, 0.05);
+}
+
+.callout strong {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.callout.note strong {
+  color: var(--accent);
+}
+
+/* ===========================
    Utility Classes
    =========================== */
 .fade-in {
