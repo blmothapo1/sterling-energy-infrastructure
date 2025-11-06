@@ -248,6 +248,74 @@
   }
 
   // ===========================
+  // Interactive Timeline Accordion
+  // ===========================
+  function initTimeline() {
+    const phaseBubbles = document.querySelectorAll('.phase-bubble');
+    
+    if (phaseBubbles.length === 0) {
+      return; // Timeline not on this page
+    }
+    
+    phaseBubbles.forEach(bubble => {
+      const toggle = bubble.querySelector('.phase-toggle');
+      const details = bubble.querySelector('.phase-details');
+      
+      if (!toggle || !details) return;
+      
+      // Set initial aria-hidden
+      details.setAttribute('aria-hidden', 'true');
+      
+      toggle.addEventListener('click', () => {
+        const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
+        
+        // Toggle the current bubble
+        toggle.setAttribute('aria-expanded', !isExpanded);
+        details.setAttribute('aria-hidden', isExpanded);
+        
+        if (!isExpanded) {
+          details.removeAttribute('hidden');
+          // Smooth scroll into view
+          setTimeout(() => {
+            bubble.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }, 100);
+        } else {
+          setTimeout(() => {
+            details.setAttribute('hidden', '');
+          }, 400); // Match CSS transition
+        }
+      });
+      
+      // Keyboard accessibility
+      toggle.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggle.click();
+        }
+      });
+    });
+    
+    // Intersection Observer for scroll-triggered animations
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.2
+    };
+    
+    const timelineObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, observerOptions);
+    
+    phaseBubbles.forEach(bubble => {
+      timelineObserver.observe(bubble);
+    });
+  }
+
+  // ===========================
   // Initialize All Features
   // ===========================
   function init() {
@@ -264,6 +332,7 @@
     initKeyboardNav();
     initHeaderEffect();
     initLazyLoad();
+    initTimeline(); // Add timeline functionality
     
     // Log initialization for debugging
     console.log('SEI Website initialized successfully');
